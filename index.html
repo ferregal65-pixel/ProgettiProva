@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 La Mia Spesa Pro v3</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --accent: #ff9800;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --input-border: #dcdde1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            margin: 0;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            max-height: 98vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        #stats {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .input-card {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            border: 1.5px solid var(--input-border);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 16px;
+            outline: none;
+            background: white;
+        }
+
+        #itemQty {
+            width: 70px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #itemUnit {
+            width: 110px;
+        }
+
+        #itemCategory {
+            flex: 1;
+        }
+
+        #itemInput {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #addBtn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        #addBtn.edit-mode {
+            background-color: var(--accent);
+        }
+
+        #shoppingList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #f1f2f6;
+            gap: 10px;
+        }
+
+        .qty-badge {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            min-width: 65px;
+            text-align: center;
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .completed {
+            opacity: 0.4;
+            background: #fdfdfd;
+        }
+
+        .completed .item-text {
+            text-decoration: line-through;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .footer-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        #clearCompletedBtn {
+            background: #dfe4ea;
+            color: #57606f;
+        }
+
+        #clearAllBtn {
+            background: #2f3542;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🛒 La Mia Spesa</h1>
+            <div id="stats">Presi: 0 / Totale: 0</div>
+        </header>
+
+        <div class="input-card">
+            <div class="input-row">
+                <input type="number" id="itemQty" value="1" min="1" step="1">
+                <select id="itemUnit" onchange="checkUnit()">
+                    <option value="pz">🔢 Pezzi</option>
+                    <option value="conf">📦 Conf.</option>
+                    <option value="kg">⚖️ Kg</option>
+                    <option value="g">⚖️ g</option>
+                    <option value="lt">💧 Litri</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <select id="itemCategory">
+                    <option value="🍎 Frutta">🍎 Frutta</option>
+                    <option value="🥦 Verdura">🥦 Verdura/Ortaggi</option>
+                    <option value="🥩 Carne">🥩 Carne Fresca</option>
+                    <option value="🥓 Salumi">🥓 Salumi/Affettati</option>
+                    <option value="🥛 Latticini">🥛 Latticini/Formaggi</option>
+                    <option value="🥚 Uova">🥚 Uova</option>
+                    <option value="🐟 Pesce">🐟 Pesce/Surgelati</option>
+                    <option value="🍞 Pane">🍞 Pane/Forni</option>
+                    <option value="🍝 Pasta/Riso">🍝 Pasta/Riso</option>
+                    <option value="🥫 Dispensa">🥫 Sughi/Scatolame</option>
+                    <option value="🍪 Snack">🍪 Snack/Dolci</option>
+                    <option value="☕ Colazione">☕ Caffè/Colazione</option>
+                    <option value="🥤 Bevande">🥤 Bevande/Acqua</option>
+                    <option value="🍷 Vino/Birra">🍷 Vino/Birra</option>
+                    <option value="🧹 Casa">🧹 Pulizia Casa</option>
+                    <option value="🧼 Persona">🧼 Igiene Persona</option>
+                    <option value="🐶 Animali">🐶 Animali</option>
+                    <option value="📦 Altro">📦 Altro</option>
+                </select>
+            </div>
+            <div class="input-row">
+                <input type="text" id="itemInput" placeholder="Cosa serve?" list="historyData" autocomplete="off">
+                <datalist id="historyData"></datalist>
+            </div>
+            <button id="addBtn" onclick="addItem()">Aggiungi in Lista</button>
+        </div>
+
+        <ul id="shoppingList"></ul>
+
+        <footer>
+            <button class="footer-btn" id="clearCompletedBtn" onclick="clearCompleted()">Pulisci Presi</button>
+            <button class="footer-btn" id="clearAllBtn" onclick="clearList()">Svuota Tutto</button>
+        </footer>
+    </div>
+
+    <script>
+        let editMode = false;
+        let originalNameBeforeEdit = "";
+
+        const unitEmojis = { 'pz': '🔢', 'conf': '📦', 'kg': '⚖️', 'g': '⚖️', 'lt': '💧' };
+
+        function checkUnit() {
+            const qtyInput = document.getElementById('itemQty');
+            const unit = document.getElementById('itemUnit').value;
+            if (unit === 'pz' || unit === 'conf') {
+                qtyInput.step = "1";
+                qtyInput.value = Math.round(qtyInput.value);
+            } else {
+                qtyInput.step = "0.1";
+            }
+        }
+
+        function addItem() {
+            const input = document.getElementById('itemInput'), qty = document.getElementById('itemQty'),
+                unitSelect = document.getElementById('itemUnit'), cat = document.getElementById('itemCategory');
+
+            let text = input.value.trim();
+            if (!text) return;
+
+            // Maiuscola automatica
+            text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+
+            let finalQty = qty.value;
+            if (unitSelect.value === 'pz' || unitSelect.value === 'conf') {
+                finalQty = Math.round(finalQty);
+            }
+
+            let items = JSON.parse(localStorage.getItem('spesa')) || [];
+            if (editMode) {
+                items = items.filter(i => i.nome !== originalNameBeforeEdit);
+                editMode = false;
+                document.getElementById('addBtn').textContent = "Aggiungi in Lista";
+                document.getElementById('addBtn').classList.remove('edit-mode');
+            }
+
+            items.push({ nome: text, qta: finalQty, unita: unitSelect.value, categoria: cat.value, preso: false });
+            localStorage.setItem('spesa', JSON.stringify(items));
+            saveHistory(text);
+            refreshUI();
+            input.value = ""; qty.value = "1"; input.focus();
+        }
+
+        function refreshUI() {
+            const list = document.getElementById('shoppingList');
+            list.innerHTML = "";
+            const items = JSON.parse(localStorage.getItem('spesa')) || [];
+
+            // Ordina per categoria per tenere Frutta con Frutta, Verdura con Verdura ecc.
+            items.sort((a, b) => a.categoria.localeCompare(b.categoria));
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                if (item.preso) li.classList.add('completed');
+                const unitEmoji = unitEmojis[item.unita] || '';
+
+                li.innerHTML = `
+                    <div class="qty-badge">${unitEmoji} ${item.qta}${item.unita}</div>
+                    <span class="item-text"><b>${item.categoria.split(' ')[0]}</b> ${item.nome}</span>
+                    <div class="actions">
+                        <button class="edit-btn" onclick="prepareEdit('${item.nome.replace(/'/g, "\\'")}', '${item.qta}', '${item.unita}', '${item.categoria}')">✍️</button>
+                        <button class="delete-btn" onclick="removeItem('${item.nome.replace(/'/g, "\\ text ")}')">🗑️</button>
+                    </div>`;
+                li.querySelector('.item-text').onclick = () => togglePreso(item.nome);
+                list.appendChild(li);
+            });
+
+            const presi = items.filter(i => i.preso).length;
+            document.getElementById('stats').textContent = `Presi: ${presi} / Totale: ${items.length}`;
+            updateHistoryDatalist();
+        }
+
+        function togglePreso(nome) {
+            let items = JSON.parse(localStorage.getItem('spesa'));
+            const idx = items.findIndex(i => i.nome === nome);
+            items[idx].preso = !items[idx].preso;
+            localStorage.setItem('spesa', JSON.stringify(items));
+            refreshUI();
+        }
+
+        function saveHistory(text) {
+            let history = JSON.parse(localStorage.getItem('cronologia_spesa')) || [];
+            if (!history.includes(text)) {
+                history.push(text);
+                localStorage.setItem('cronologia_spesa', JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryDatalist() {
+            const h = JSON.parse(localStorage.getItem('cronologia_spesa')) || [];
+            document.getElementById('historyData').innerHTML = h.map(i => `<option value="${i}">`).join('');
+        }
+
+        function prepareEdit(nome, qta, unita, cat) {
+            document.getElementById('itemInput').value = nome;
+            document.getElementById('itemQty').value = qta;
+            document.getElementById('itemUnit').value = unita;
+            document.getElementById('itemCategory').value = cat;
+            editMode = true;
+            originalNameBeforeEdit = nome;
+            document.getElementById('addBtn').textContent = "Aggiorna Prodotto";
+            document.getElementById('addBtn').classList.add('edit-mode');
+            checkUnit();
+        }
+
+        function removeItem(nome) {
+            let items = JSON.parse(localStorage.getItem('spesa')).filter(i => i.nome !== nome);
+            localStorage.setItem('spesa', JSON.stringify(items));
+            refreshUI();
+        }
+
+        function clearCompleted() {
+            let items = JSON.parse(localStorage.getItem('spesa')) || [];
+            items = items.filter(i => !i.preso);
+            localStorage.setItem('spesa', JSON.stringify(items));
+            refreshUI();
+        }
+
+        function clearList() { if (confirm("Svuotare tutto?")) { localStorage.removeItem('spesa'); refreshUI(); } }
+
+        document.getElementById('itemInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addItem(); });
+        window.onload = refreshUI;
+    </script>
+</body>
+
+</html>
