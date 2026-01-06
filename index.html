@@ -3,11 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛒 La Mia Spesa Pro v3</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🛒 La Mia Spesa Pro</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+    
     <style>
         :root {
             --primary: #4CAF50;
@@ -20,7 +19,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             display: flex;
@@ -29,6 +28,7 @@
             margin: 0;
             height: 100vh;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -43,24 +43,11 @@
             max-height: 98vh;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+        header { text-align: center; margin-bottom: 15px; }
+        h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+        #stats { font-size: 0.85rem; color: #7f8c8d; font-weight: 600; text-transform: uppercase; margin-top: 5px; }
 
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
-
-        #stats {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
+        /* SEZIONE INPUT MIGLIORATA */
         .input-card {
             background: #f1f2f6;
             padding: 15px;
@@ -68,40 +55,22 @@
             margin-bottom: 15px;
         }
 
-        .input-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+        .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
 
-        input,
-        select {
+        input, select {
             border: 1.5px solid var(--input-border);
             border-radius: 12px;
             padding: 12px;
-            font-size: 16px;
+            font-size: 16px; /* Importante per evitare lo zoom su iPhone */
             outline: none;
             background: white;
+            -webkit-appearance: none; /* Rende select più pulito su iOS */
         }
 
-        #itemQty {
-            width: 70px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        #itemUnit {
-            width: 110px;
-        }
-
-        #itemCategory {
-            flex: 1;
-        }
-
-        #itemInput {
-            width: 100%;
-            box-sizing: border-box;
-        }
+        #itemQty { width: 70px; text-align: center; font-weight: bold; }
+        #itemUnit { width: 110px; }
+        #itemCategory { flex: 1; }
+        #itemInput { width: 100%; box-sizing: border-box; }
 
         #addBtn {
             background-color: var(--primary);
@@ -112,19 +81,20 @@
             cursor: pointer;
             font-weight: 700;
             width: 100%;
-            transition: 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
 
-        #addBtn.edit-mode {
-            background-color: var(--accent);
-        }
+        #addBtn:active { transform: scale(0.98); }
+        #addBtn.edit-mode { background-color: var(--accent); }
 
+        /* LISTA PRODOTTI */
         #shoppingList {
             list-style: none;
             padding: 0;
             margin: 0;
             overflow-y: auto;
             flex: 1;
+            -webkit-overflow-scrolling: touch;
         }
 
         li {
@@ -146,60 +116,17 @@
             text-align: center;
         }
 
-        .item-text {
-            flex: 1;
-            font-size: 1rem;
-            cursor: pointer;
-        }
+        .item-text { flex: 1; font-size: 1rem; cursor: pointer; font-weight: 500; }
+        .completed { opacity: 0.4; background: #fdfdfd; }
+        .completed .item-text { text-decoration: line-through; }
 
-        .completed {
-            opacity: 0.4;
-            background: #fdfdfd;
-        }
+        .actions { display: flex; gap: 5px; }
+        .edit-btn, .delete-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 5px; }
 
-        .completed .item-text {
-            text-decoration: line-through;
-        }
-
-        .actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .edit-btn,
-        .delete-btn {
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        footer {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .footer-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-
-        #clearCompletedBtn {
-            background: #dfe4ea;
-            color: #57606f;
-        }
-
-        #clearAllBtn {
-            background: #2f3542;
-            color: white;
-        }
+        footer { display: flex; gap: 10px; margin-top: 15px; }
+        .footer-btn { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem; }
+        #clearCompletedBtn { background: #dfe4ea; color: #57606f; }
+        #clearAllBtn { background: #2f3542; color: white; }
     </style>
 </head>
 
@@ -213,7 +140,7 @@
 
         <div class="input-card">
             <div class="input-row">
-                <input type="number" id="itemQty" value="1" min="1" step="1">
+                <input type="number" id="itemQty" value="1" min="1" step="1" inputmode="decimal">
                 <select id="itemUnit" onchange="checkUnit()">
                     <option value="pz">🔢 Pezzi</option>
                     <option value="conf">📦 Conf.</option>
@@ -262,7 +189,6 @@
     <script>
         let editMode = false;
         let originalNameBeforeEdit = "";
-
         const unitEmojis = { 'pz': '🔢', 'conf': '📦', 'kg': '⚖️', 'g': '⚖️', 'lt': '💧' };
 
         function checkUnit() {
@@ -278,12 +204,12 @@
 
         function addItem() {
             const input = document.getElementById('itemInput'), qty = document.getElementById('itemQty'),
-                unitSelect = document.getElementById('itemUnit'), cat = document.getElementById('itemCategory');
-
+                  unitSelect = document.getElementById('itemUnit'), cat = document.getElementById('itemCategory');
+            
             let text = input.value.trim();
             if (!text) return;
 
-            // Maiuscola automatica
+            // Formattazione: Prima lettera Maiuscola, resto minuscolo
             text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
             let finalQty = qty.value;
@@ -291,45 +217,59 @@
                 finalQty = Math.round(finalQty);
             }
 
-            let items = JSON.parse(localStorage.getItem('spesa')) || [];
-            if (editMode) {
-                items = items.filter(i => i.nome !== originalNameBeforeEdit);
-                editMode = false;
-                document.getElementById('addBtn').textContent = "Aggiungi in Lista";
-                document.getElementById('addBtn').classList.remove('edit-mode');
-            }
+            try {
+                let items = JSON.parse(localStorage.getItem('spesa')) || [];
+                if (editMode) {
+                    items = items.filter(i => i.nome !== originalNameBeforeEdit);
+                    editMode = false;
+                    document.getElementById('addBtn').textContent = "Aggiungi in Lista";
+                    document.getElementById('addBtn').classList.remove('edit-mode');
+                } else if (items.some(i => i.nome === text)) {
+                    alert("Già in lista!"); return;
+                }
 
-            items.push({ nome: text, qta: finalQty, unita: unitSelect.value, categoria: cat.value, preso: false });
-            localStorage.setItem('spesa', JSON.stringify(items));
-            saveHistory(text);
-            refreshUI();
-            input.value = ""; qty.value = "1"; input.focus();
+                items.push({ nome: text, qta: finalQty, unita: unitSelect.value, categoria: cat.value, preso: false });
+                localStorage.setItem('spesa', JSON.stringify(items));
+                
+                // Salvataggio cronologia
+                let history = JSON.parse(localStorage.getItem('cronologia_spesa')) || [];
+                if (!history.includes(text)) {
+                    history.push(text);
+                    localStorage.setItem('cronologia_spesa', JSON.stringify(history));
+                }
+
+                refreshUI();
+                input.value = ""; qty.value = "1"; 
+                input.blur(); // Chiude la tastiera su iOS
+            } catch (e) {
+                alert("Errore: Assicurati che la navigazione privata sia disattivata.");
+            }
         }
 
         function refreshUI() {
             const list = document.getElementById('shoppingList');
+            if(!list) return;
             list.innerHTML = "";
             const items = JSON.parse(localStorage.getItem('spesa')) || [];
-
-            // Ordina per categoria per tenere Frutta con Frutta, Verdura con Verdura ecc.
+            
             items.sort((a, b) => a.categoria.localeCompare(b.categoria));
-
+            
             items.forEach(item => {
                 const li = document.createElement('li');
                 if (item.preso) li.classList.add('completed');
                 const unitEmoji = unitEmojis[item.unita] || '';
-
+                
                 li.innerHTML = `
                     <div class="qty-badge">${unitEmoji} ${item.qta}${item.unita}</div>
                     <span class="item-text"><b>${item.categoria.split(' ')[0]}</b> ${item.nome}</span>
                     <div class="actions">
                         <button class="edit-btn" onclick="prepareEdit('${item.nome.replace(/'/g, "\\'")}', '${item.qta}', '${item.unita}', '${item.categoria}')">✍️</button>
-                        <button class="delete-btn" onclick="removeItem('${item.nome.replace(/'/g, "\\ text ")}')">🗑️</button>
+                        <button class="delete-btn" onclick="removeItem('${item.nome.replace(/'/g, "\\'")}')">🗑️</button>
                     </div>`;
                 li.querySelector('.item-text').onclick = () => togglePreso(item.nome);
                 list.appendChild(li);
             });
-
+            
             const presi = items.filter(i => i.preso).length;
             document.getElementById('stats').textContent = `Presi: ${presi} / Totale: ${items.length}`;
             updateHistoryDatalist();
@@ -338,22 +278,17 @@
         function togglePreso(nome) {
             let items = JSON.parse(localStorage.getItem('spesa'));
             const idx = items.findIndex(i => i.nome === nome);
-            items[idx].preso = !items[idx].preso;
-            localStorage.setItem('spesa', JSON.stringify(items));
-            refreshUI();
-        }
-
-        function saveHistory(text) {
-            let history = JSON.parse(localStorage.getItem('cronologia_spesa')) || [];
-            if (!history.includes(text)) {
-                history.push(text);
-                localStorage.setItem('cronologia_spesa', JSON.stringify(history));
+            if(idx > -1) {
+                items[idx].preso = !items[idx].preso;
+                localStorage.setItem('spesa', JSON.stringify(items));
+                refreshUI();
             }
         }
 
         function updateHistoryDatalist() {
             const h = JSON.parse(localStorage.getItem('cronologia_spesa')) || [];
-            document.getElementById('historyData').innerHTML = h.map(i => `<option value="${i}">`).join('');
+            const datalist = document.getElementById('historyData');
+            if(datalist) datalist.innerHTML = h.map(i => `<option value="${i}">`).join('');
         }
 
         function prepareEdit(nome, qta, unita, cat) {
@@ -363,9 +298,10 @@
             document.getElementById('itemCategory').value = cat;
             editMode = true;
             originalNameBeforeEdit = nome;
-            document.getElementById('addBtn').textContent = "Aggiorna Prodotto";
-            document.getElementById('addBtn').classList.add('edit-mode');
-            checkUnit();
+            const btn = document.getElementById('addBtn');
+            btn.textContent = "Aggiorna Prodotto";
+            btn.classList.add('edit-mode');
+            window.scrollTo(0,0);
         }
 
         function removeItem(nome) {
@@ -381,11 +317,12 @@
             refreshUI();
         }
 
-        function clearList() { if (confirm("Svuotare tutto?")) { localStorage.removeItem('spesa'); refreshUI(); } }
+        function clearList() { if (confirm("Svuotare tutta la lista?")) { localStorage.removeItem('spesa'); refreshUI(); } }
 
         document.getElementById('itemInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addItem(); });
+        
+        // Avvio app
         window.onload = refreshUI;
     </script>
 </body>
-
 </html>
