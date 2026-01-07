@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spesa PRO</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --bg: #f0f2f5;
+            --text: #2c3e50;
+            --shopA: #3498db;
+            --shopB: #e74c3c;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .shop-column {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-top: 6px solid;
+        }
+
+        .shop-a {
+            border-color: var(--shopA);
+        }
+
+        .shop-b {
+            border-color: var(--shopB);
+        }
+
+        .input-section {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add.edit-mode {
+            background: #ff9800;
+        }
+
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .item-card {
+            display: grid;
+            grid-template-columns: 35px 1fr 65px 75px 75px 65px;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            gap: 8px;
+        }
+
+        .item-card.completed {
+            opacity: 0.5;
+            background: #f9f9f9;
+        }
+
+        .price {
+            font-family: monospace;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: right;
+        }
+
+        .total {
+            font-family: monospace;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .column-footer {
+            padding: 15px;
+            background: #2c3e50;
+            color: white;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grand-total {
+            font-size: 1.3rem;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            background: #fff;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            border-top: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            background: #f9f9f9;
+        }
+
+        /* OVERLAYS (MODALS) */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .modal input {
+            width: 90%;
+            margin: 10px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #historyManager {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            max-height: 70vh;
+            width: 300px;
+            flex-direction: column;
+        }
+
+        .history-list {
+            overflow-y: auto;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .del-hist {
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+            background: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+        }
+
+        .actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>📊 Confronto Spesa & Gestione Scontrini</h1>
+    </header>
+
+    <main class="main-content">
+        <datalist id="historyData"></datalist>
+
+        <script>
+            const categories = [
+                "🍎 Frutta", "🥦 Verdura", "🥩 Carne", "🥓 Salumi", "🥛 Latticini",
+                "🥚 Uova", "🐟 Pesce", "🍞 Pane", "🍝 Pasta/Riso", "🥫 Dispensa",
+                "🍪 Snack", "☕ Colazione", "🥤 Bevande", "🍷 Vino/Birra", "🧹 Casa",
+                "🧼 Persona", "🐶 Animali", "📦 Altro"
+            ];
+
+            function renderColumn(id) {
+                document.write(`
+                <section class="shop-column shop-${id.toLowerCase()}">
+                    <div style="padding:10px; text-align:center"><h2 id="titleShop${id}">Punto Vendita ${id}</h2></div>
+                    <div class="input-section">
+                        <div class="input-row">
+                            <input type="number" id="qty${id}" value="1" style="width:55px" step="any">
+                            <select id="unit${id}">
+                                <option value="pz">🔢 pz</option><option value="conf">📦 conf</option>
+                                <option value="kg">⚖️ kg</option><option value="lt">💧 lt</option>
+                            </select>
+                            <input type="text" id="name${id}" placeholder="Prodotto..." style="flex:1" list="historyData" autocomplete="off">
+                        </div>
+                        <div class="input-row">
+                            <select id="cat${id}" style="flex:1">
+                                ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+                            </select>
+                            <input type="number" id="price${id}" placeholder="€" step="0.01" style="width:85px">
+                            <button id="btn${id}" class="btn-add" onclick="addItem('${id}')">AGGIUNGI</button>
+                        </div>
+                    </div>
+                    <div class="list-container" id="list${id}"></div>
+                    <div class="column-footer">
+                        <span>TOTALE SCONTRINO:</span>
+                        <span class="grand-total" id="total${id}">€ 0.00</span>
+                    </div>
+                </section>
+                `);
+            }
+            renderColumn('A'); renderColumn('B');
+        </script>
+    </main>
+
+    <div id="configOverlay" class="overlay" style="display:flex;">
+        <div class="modal">
+            <h2 id="modalTitle">Benvenuto! 🛒</h2>
+            <p>Personalizza i nomi dei tuoi negozi:</p>
+            <input type="text" id="inputNameA" placeholder="Nome Negozio A (es. Lidl)">
+            <input type="text" id="inputNameB" placeholder="Nome Negozio B (es. Coop)">
+            <button class="btn-add" onclick="saveShopNames()" style="width:100%; margin-top:15px;">Salva e
+                Inizia</button>
+        </div>
+    </div>
+
+    <div id="historyManager">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <h3>Cronologia Prodotti</h3>
+            <button onclick="toggleHistoryManager()" style="cursor:pointer">✖</button>
+        </div>
+        <div class="history-list" id="historyListContent"></div>
+    </div>
+
+    <div class="toolbar">
+        <button class="tool-btn" onclick="exportData()">📥 Esporta JSON</button>
+        <button class="tool-btn" onclick="document.getElementById('importFile').click()">📤 Importa JSON</button>
+        <button class="tool-btn" onclick="toggleHistoryManager()">📝 Cronologia</button>
+        <button class="tool-btn" onclick="openShopEditor()">✏️ Modifica Nomi</button>
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        <button class="tool-btn" style="color:red" onclick="clearEverything()">🗑️ Svuota Tutto</button>
+    </div>
+
+    <script>
+        let editStates = { A: null, B: null };
+        const unitEmojis = { 'pz': '🔢', 'conf': '📦', 'kg': '⚖️', 'lt': '💧' };
+
+        // --- GESTIONE NOMI ---
+        function checkFirstRun() {
+            const nameA = localStorage.getItem('shopNameA');
+            const nameB = localStorage.getItem('shopNameB');
+            if (nameA && nameB) {
+                applyShopNames(nameA, nameB);
+                document.getElementById('configOverlay').style.display = 'none';
+            }
+        }
+
+        function saveShopNames() {
+            const a = document.getElementById('inputNameA').value.trim() || "Negozio A";
+            const b = document.getElementById('inputNameB').value.trim() || "Negozio B";
+            localStorage.setItem('shopNameA', a);
+            localStorage.setItem('shopNameB', b);
+            applyShopNames(a, b);
+            document.getElementById('configOverlay').style.display = 'none';
+        }
+
+        function applyShopNames(a, b) {
+            document.getElementById('titleShopA').textContent = "🛒 " + a;
+            document.getElementById('titleShopB').textContent = "🛒 " + b;
+        }
+
+        function openShopEditor() {
+            document.getElementById('modalTitle').textContent = "Modifica Nomi";
+            document.getElementById('inputNameA').value = localStorage.getItem('shopNameA') || "";
+            document.getElementById('inputNameB').value = localStorage.getItem('shopNameB') || "";
+            document.getElementById('configOverlay').style.display = 'flex';
+        }
+
+        // --- LOGICA CORE ---
+        function addItem(shop) {
+            const name = document.getElementById(`name${shop}`).value.trim();
+            const qty = parseFloat(document.getElementById(`qty${shop}`).value);
+            const price = parseFloat(document.getElementById(`price${shop}`).value) || 0;
+            const unit = document.getElementById(`unit${shop}`).value;
+            const cat = document.getElementById(`cat${shop}`).value;
+            if (!name) return;
+
+            let items = JSON.parse(localStorage.getItem(`spesa_${shop}`)) || [];
+            if (editStates[shop]) {
+                items = items.filter(i => i.id !== editStates[shop]);
+                editStates[shop] = null;
+                document.getElementById(`btn${shop}`).textContent = "AGGIUNGI";
+                document.getElementById(`btn${shop}`).classList.remove('edit-mode');
+            }
+
+            const formattedName = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+            items.push({ id: Date.now(), name: formattedName, qty, price, unit, cat, preso: false });
+            localStorage.setItem(`spesa_${shop}`, JSON.stringify(items));
+            saveToHistory(formattedName);
+            resetInputs(shop);
+            refreshUI();
+        }
+
+        function refreshUI() {
+            ['A', 'B'].forEach(shop => {
+                const container = document.getElementById(`list${shop}`);
+                const items = JSON.parse(localStorage.getItem(`spesa_${shop}`)) || [];
+                let totalScontrino = 0;
+                container.innerHTML = "";
+                items.sort((a, b) => a.cat.localeCompare(b.cat)).forEach(item => {
+                    const rigaTotal = item.qty * item.price;
+                    totalScontrino += rigaTotal;
+                    const div = document.createElement('div');
+                    div.className = `item-card ${item.preso ? 'completed' : ''}`;
+                    div.innerHTML = `
+                        <span>${item.cat.split(' ')[0]}</span>
+                        <span style="cursor:pointer" onclick="togglePreso('${shop}', ${item.id})"><b>${item.name}</b></span>
+                        <span style="font-size:0.8rem">${unitEmojis[item.unit]} ${item.qty}${item.unit}</span>
+                        <span class="price">€${item.price.toFixed(2)}</span>
+                        <span class="total">€${rigaTotal.toFixed(2)}</span>
+                        <div class="actions">
+                            <button onclick="prepareEdit('${shop}', ${item.id})">✍️</button>
+                            <button onclick="removeItem('${shop}', ${item.id})">🗑️</button>
+                        </div>`;
+                    container.appendChild(div);
+                });
+                document.getElementById(`total${shop}`).textContent = `€ ${totalScontrino.toFixed(2)}`;
+            });
+            updateHistoryDatalist();
+        }
+
+        function saveToHistory(name) {
+            let history = JSON.parse(localStorage.getItem('spesa_cronologia')) || [];
+            if (!history.includes(name)) {
+                history.push(name);
+                localStorage.setItem('spesa_cronologia', JSON.stringify(history));
+            }
+        }
+
+        function updateHistoryDatalist() {
+            const history = JSON.parse(localStorage.getItem('spesa_cronologia')) || [];
+            document.getElementById('historyData').innerHTML = history.map(item => `<option value="${item}">`).join('');
+            const listContent = document.getElementById('historyListContent');
+            listContent.innerHTML = history.sort().map(item => `
+                <div class="history-item">
+                    <span>${item}</span>
+                    <button class="del-hist" onclick="deleteHistoryItem('${item}')">✖</button>
+                </div>`).join('');
+        }
+
+        function deleteHistoryItem(name) {
+            let history = JSON.parse(localStorage.getItem('spesa_cronologia')) || [];
+            history = history.filter(i => i !== name);
+            localStorage.setItem('spesa_cronologia', JSON.stringify(history));
+            updateHistoryDatalist();
+        }
+
+        function toggleHistoryManager() {
+            const manager = document.getElementById('historyManager');
+            manager.style.display = (manager.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function prepareEdit(shop, id) {
+            const items = JSON.parse(localStorage.getItem(`spesa_${shop}`));
+            const item = items.find(i => i.id === id);
+            document.getElementById(`name${shop}`).value = item.name;
+            document.getElementById(`qty${shop}`).value = item.qty;
+            document.getElementById(`price${shop}`).value = item.price;
+            document.getElementById(`unit${shop}`).value = item.unit;
+            document.getElementById(`cat${shop}`).value = item.cat;
+            editStates[shop] = id;
+            document.getElementById(`btn${shop}`).textContent = "AGGIORNA";
+            document.getElementById(`btn${shop}`).classList.add('edit-mode');
+        }
+
+        function togglePreso(shop, id) {
+            let items = JSON.parse(localStorage.getItem(`spesa_${shop}`));
+            const idx = items.findIndex(i => i.id === id);
+            items[idx].preso = !items[idx].preso;
+            localStorage.setItem(`spesa_${shop}`, JSON.stringify(items));
+            refreshUI();
+        }
+
+        function removeItem(shop, id) {
+            let items = JSON.parse(localStorage.getItem(`spesa_${shop}`)).filter(i => i.id !== id);
+            localStorage.setItem(`spesa_${shop}`, JSON.stringify(items));
+            refreshUI();
+        }
+
+        function resetInputs(shop) {
+            document.getElementById(`name${shop}`).value = "";
+            document.getElementById(`price${shop}`).value = "";
+            document.getElementById(`qty${shop}`).value = "1";
+        }
+
+        function exportData() {
+            const data = {
+                shopA: JSON.parse(localStorage.getItem('spesa_A')) || [],
+                shopB: JSON.parse(localStorage.getItem('spesa_B')) || [],
+                history: JSON.parse(localStorage.getItem('spesa_cronologia')) || [],
+                names: { a: localStorage.getItem('shopNameA'), b: localStorage.getItem('shopNameB') }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `spesa_backup.json`;
+            a.click();
+        }
+
+        function importData(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = JSON.parse(e.target.result);
+                localStorage.setItem('spesa_A', JSON.stringify(data.shopA || []));
+                localStorage.setItem('spesa_B', JSON.stringify(data.shopB || []));
+                localStorage.setItem('spesa_cronologia', JSON.stringify(data.history || []));
+                if (data.names) {
+                    localStorage.setItem('shopNameA', data.names.a);
+                    localStorage.setItem('shopNameB', data.names.b);
+                    applyShopNames(data.names.a, data.names.b);
+                }
+                refreshUI();
+                alert("Backup importato con successo!");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        function clearEverything() {
+            if (confirm("Attenzione: questo cancellerà TUTTI i dati, i nomi e la cronologia. Continuare?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        window.onload = () => {
+            checkFirstRun();
+            refreshUI();
+        };
+    </script>
+</body>
+
+</html>
